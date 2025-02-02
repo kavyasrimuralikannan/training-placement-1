@@ -1,0 +1,35 @@
+
+void backTrack(int* nums, int n, int i, int pos, int k, int** ans, int* cols, int* apos) {
+    static int curr[12];
+    int j, xor = 0;
+    if (pos == k) {
+        ans[*apos] = (int*)malloc(k * sizeof(int));
+        cols[*apos] = k;
+        for (j = 0; j < k; ++j) {
+            ans[*apos][j] = curr[j];
+        }
+        *apos += 1;
+        return;
+    }
+    for (j = i + 1; j < n; ++j) {
+        if (n - j < k - pos)
+            return;
+        curr[pos] = nums[j];
+        backTrack(nums, n, j, pos + 1, k, ans, cols, apos);
+    }
+}
+
+int** subsets(int* nums, int numsSize, int* returnSize, int** returnColumnSizes) {
+    int n = numsSize, **ans, *cols, k, apos = 1, rSize;
+    rSize = 1 << n;
+    ans = (int**)malloc(rSize * sizeof(int*));
+    cols = (int*)malloc(rSize * sizeof(int));
+    ans[0] = NULL;
+    cols[0] = 0;
+    for (k = 1; k <= n; ++k) {
+        backTrack(nums, n, -1, 0, k, ans, cols, &apos);
+    }
+    *returnSize = rSize;
+    *returnColumnSizes = cols;
+    return ans;
+}
