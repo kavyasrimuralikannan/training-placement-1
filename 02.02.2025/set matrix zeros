@@ -1,0 +1,47 @@
+void fillzero_curRow(int** matrix,int row,int col){
+    for(int i=0;i<col;i++){
+        matrix[row][i]=0;
+    }
+}
+void fill_ColumnUp(int** matrix,int col,int row){
+    for(int i=row-1;i>=0;i--){
+        matrix[i][col]=0;
+    }
+}
+void setZeroes(int** matrix, int matrixSize, int* matrixColSize) {
+    int Row=matrixSize;
+    int Col=matrixColSize[0];
+    int i,j,cur_row=-1,next_row=-1,c,k;
+    for(i=0;i<Row && cur_row==-1;i++){
+        for(j=0;j<Col;j++){
+            if(matrix[i][j]==0){
+              fill_ColumnUp(matrix,j,i);
+              cur_row=i;
+            }
+        }
+    }
+    if(cur_row==-1)
+      return;
+    for(i=cur_row+1;i<Row;i++){
+        for(j=0;j<Col;j++){
+            if(matrix[i][j]==0 && next_row==-1)
+                next_row=i;
+            else if(matrix[cur_row][j]==0)
+                matrix[i][j]=0;
+        }
+        if(next_row!=-1){
+            fillzero_curRow(matrix,cur_row,Col);
+            cur_row=next_row;
+            next_row=-1;
+            for(c=0;c<Col;c++){
+                if(matrix[cur_row][c]==0){
+                   for(k=cur_row-1;k>=0;k--){
+                      matrix[k][c]=0;
+                   }
+                }
+            }
+        }
+    }
+    if(cur_row!=-1)
+      fillzero_curRow(matrix,cur_row,Col);
+}
