@@ -1,0 +1,25 @@
+
+
+void sortColors(int* nums, int numsSize) {
+    int count0s = 0;
+    int count1s = 0;
+    int count2s = 0;
+    for (int i = 0; i < numsSize; i++) {
+        if (nums[i] == 0)
+            count0s++;
+        else if (nums[i] == 1)
+            count1s++;
+        else
+            count2s++;
+    }
+    int x = 0;
+    for (int i = 0; i < count0s; i++) {
+        nums[x++] = 0;
+    }
+    for (int i = 0; i < count1s; i++) {
+        nums[x++] = 1;
+    }
+    for (int i = 0; i < count2s; i++) {
+        nums[x++] = 2;
+    }
+}
