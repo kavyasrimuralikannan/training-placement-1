@@ -1,0 +1,113 @@
+struct Node {
+    struct Node* children['z'-'a'+1];
+    int exists;
+    int used;
+};
+
+void node_free(struct Node* n) {
+    int i;
+    if (!n) {
+        return;
+    }
+    for (i=0; i < 'z'-'a'+1; i=i+1) {
+        node_free(n->children[i]);
+    }
+    free(n);
+}
+
+void add(struct Node** root, char* word) {
+    while (*word) {
+        if (!*root) {
+            *root = calloc(1, sizeof(struct Node));
+        }
+        root = &(*root)->children[*word - 'a'];
+        word++;
+    }
+    if (!*root) {
+        *root = calloc(1, sizeof(struct Node));
+    }
+    (*root)->exists = 1;
+}
+
+struct Pair {
+    int x;
+    int y;
+};
+
+struct Result {
+    char** r;
+    int cap;
+    int n;
+    char cur[20];
+    int i;
+};
+
+int cmp(const void* a, const void* b) {
+    const char* s1 = *(char**)a;
+    const char* s2 = *(char**)b;
+    return strcmp(s1, s2);
+}
+
+void flush(struct Result* r) {
+    if (r->n <= r->cap) {
+        r->cap = (r->cap+1)*2;
+        r->r = realloc(r->r,r->cap*sizeof(char*));
+    }
+    r->cur[r->i] = 0;
+    r->r[r->n++] = strdup(r->cur);
+}
+
+void dfs(struct Result* r, char** board, int x, int y, int n, int m, struct Node* cur);
+
+void dfs_next(struct Result* r, char** board, int x, int y, int n, int m, struct Node* cur)
+{
+    char curLetter = board[x][y];
+    int index = r->i++;
+    struct Node* next = cur->children[curLetter-'a'];
+    
+    board[x][y] = 0;
+    r->cur[index] = curLetter;
+
+    dfs(r, board,x,y,n,m,next);
+
+    board[x][y] = curLetter;
+    r->i = index;
+}
+
+void dfs(struct Result* r, char** board, int x, int y, int n, int m, struct Node* cur) {
+    int i;
+    int next;
+    struct Pair p[] = {{-1,0},{0,-1},{1,0},{0,1}};
+    if (!cur) {
+        return;
+    }
+    if (cur->exists && !cur->used) {
+        flush(r);
+        cur->used = 1;
+    }
+    for (i = 0; i < 4; i=i+1) {
+        if (p[i].x+x >= 0 && p[i].x+x < n 
+            && p[i].y+y >= 0 && p[i].y+y < m
+            && board[p[i].x+x][p[i].y+y])
+        {
+            dfs_next(r, board, p[i].x+x, p[i].y+y, n,m,cur);
+        }
+    }
+}
+char ** findWords(char** board, int boardSize, int* boardColSize, char ** words, int wordsSize, int* returnSize){
+    struct Node* root = NULL;
+    struct Result r;
+    int i,j;
+    memset(&r, 0, sizeof(r));
+    for (i = 0; i < wordsSize; i++) {
+        add(&root, words[i]);
+    }
+    for (i = 0; i < boardSize; i++) {
+        for (j = 0; j < *boardColSize; j++) {
+            dfs_next(&r, board, i, j, boardSize, *boardColSize, root);
+        }
+    }
+    node_free(root);
+    *returnSize = r.n;
+    return r.r;
+}
