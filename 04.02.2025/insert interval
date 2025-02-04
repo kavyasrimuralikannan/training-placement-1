@@ -1,0 +1,58 @@
+int cmp(const void *a, const void *b)
+{
+    return (*((int **)a))[0] - (*((int **)b))[0];
+}
+ 
+int** insert(int** intervals, int intervalsSize, int* intervalsColSize, int* newInterval, int newIntervalSize, int* returnSize, int** returnColumnSizes)
+     
+    int seg_start = newInterval[0], seg_end = newInterval[1];
+    int **ans = (int **)malloc(sizeof(int *) * (intervalsSize + 1));
+    int **tmp = (int **)malloc(sizeof(int *) * (intervalsSize + 1));
+    (*returnColumnSizes) = (int *)malloc(sizeof(int) * (intervalsSize + 1));
+    
+    *returnSize = 0;
+    for (int i = 0; i < intervalsSize; i++) {
+        tmp[i] = (int *)malloc(sizeof(int) * 2);
+        tmp[i][0] = intervals[i][0];
+        tmp[i][1] = intervals[i][1];
+    }
+    tmp[intervalsSize] = (int *)malloc(sizeof(int) * 2);
+    ans[intervalsSize] = (int *)malloc(sizeof(int) * 2);
+    tmp[intervalsSize][0] = newInterval[0];
+    tmp[intervalsSize][1] = newInterval[1];
+    qsort(tmp, intervalsSize + 1, sizeof(int *), cmp);
+    
+    seg_start = tmp[0][0];
+    seg_end = tmp[0][1];
+    for (int i = 0; i < intervalsSize + 1; i++) {
+        /* Check if segements can be merged, and store the start and end position of merged segment */
+        if (tmp[i][0] >= seg_start && tmp[i][0] <= seg_end) {
+            seg_end = MAX(seg_end, tmp[i][1]);
+        }
+        else {
+            ans[*returnSize] = (int *)malloc(sizeof(int) * 2);
+            ans[*returnSize][0] = seg_start;
+            ans[*returnSize][1] = seg_end;
+            (*returnColumnSizes)[*returnSize] = 2;
+            *returnSize += 1;
+            seg_start = tmp[i][0];
+            seg_end = tmp[i][1];
+        }
+        if (i == intervalsSize) {
+            ans[*returnSize] = (int *)malloc(sizeof(int) * 2);
+            ans[*returnSize][0] = seg_start;
+            ans[*returnSize][1] = seg_end;
+            (*returnColumnSizes)[*returnSize] = 2;
+            *returnSize += 1;
+        }
+    }
+    
+    for (int i = 0; i < intervalsSize + 1; i++) {
+        free(tmp[i]);
+    }
+
+    free(tmp);
+
+    return ans;
+
+}
