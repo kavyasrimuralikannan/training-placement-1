@@ -1,0 +1,71 @@
+
+char** fullJustify(char** words, int wordsSize, int maxWidth, int* returnSize)
+{
+    char** out = malloc(50 * sizeof(char*));
+
+    int lineIndex = 0;
+    int wordIndex = 0;
+    while (wordIndex < wordsSize)
+    {
+        int chars = 0;
+        int numWords = 0;
+        for (int i = wordIndex; i < wordsSize; i++)
+        {
+            size_t len = strlen(words[i]);
+            if (chars + len > maxWidth)
+                break;
+
+            chars += len + 1;
+            numWords++;
+        }
+        chars -= 1;
+
+        char* line = malloc(maxWidth + 1 + 1);
+
+        if (numWords == 1)
+        {
+            snprintf(line, maxWidth + 1, "%s", words[wordIndex]);
+            for (int i = 0; i < maxWidth - chars; i++)
+                (line + chars)[i] = ' ';
+            line[maxWidth] = '\0';
+        }
+        else
+        {
+            const int numSlots = numWords - 1;
+            const int numSpaces = maxWidth - chars;
+    
+            const bool isLastLine = wordIndex + numWords >= wordsSize;
+            int remainder = numSpaces % numSlots;
+            int charCount = 0;
+            for (int i = 0; i < numWords; i++)
+            {
+                charCount += snprintf(line + charCount, maxWidth + 1, "%s ", words[i + wordIndex]);
+                if (i == numWords - 1 || isLastLine)
+                    continue;
+                
+                int currentSpaces = (remainder > 0 ? 1 : 0) + numSpaces / numSlots;
+                if (remainder > 0) remainder--;
+    
+                for (int i = 0; i < currentSpaces; i++)
+                    charCount += snprintf(line + charCount, maxWidth + 1, " ");
+            }
+            if (line[maxWidth] == ' ') line[maxWidth] = '\0';
+            else line[maxWidth + 1] = '\0';
+
+            if (isLastLine)
+            {
+                int numSpaces = maxWidth - charCount;
+                for (int i = 0; i < numSpaces; i++)
+                    charCount += snprintf(line + charCount, maxWidth + 1, " ");
+            }
+        }
+
+        out[lineIndex] = line;
+
+        wordIndex += numWords;
+        lineIndex++;
+    }
+
+    *returnSize = lineIndex;
+    return out;
+}
